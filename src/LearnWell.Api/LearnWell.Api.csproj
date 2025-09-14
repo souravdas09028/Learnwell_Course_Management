@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\LearnWell.Infrastructure\LearnWell.Infrastructure.csproj" />
+    <ProjectReference Include="..\LearnWell.Infrastructure\LearnWell.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
