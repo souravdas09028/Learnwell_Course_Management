@@ -25,23 +25,23 @@ services:
     networks:
       - learnwell-network
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: learnwell_course_management-api
-    ports:
-      - "5050:8080"
-    depends_on:
-      - db
-      - seq
-    environment:
-      - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=LearnWellDB;Username=admin;Password=admin
-      - Seq__ServerUrl=http://seq:80
-    networks:
-      - learnwell-network
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: learnwell_course_management-api
+  #   ports:
+  #     - "5050:8888"
+  #   depends_on:
+  #     - db
+  #     - seq
+  #   environment:
+  #     - ASPNETCORE_URLS=http://+:8888
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=LearnWellDB;Username=admin;Password=admin
+  #     - Seq__ServerUrl=http://seq:80
+  #   networks:
+  #     - learnwell-network
 
 volumes:
   pgdata:
