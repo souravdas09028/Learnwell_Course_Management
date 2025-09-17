@@ -36,6 +36,7 @@ services:
   #     - db
   #     - seq
   #   environment:
+  #     - Jwt__Key=mysupersecurelongkey1234567890!@#$%
   #     - ASPNETCORE_URLS=http://+:8888
   #     - ASPNETCORE_ENVIRONMENT=Development
   #     - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=LearnWellDB;Username=admin;Password=admin

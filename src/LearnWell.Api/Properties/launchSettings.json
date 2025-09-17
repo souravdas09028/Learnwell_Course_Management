@@ -8,7 +8,8 @@
       //"launchBrowser": true,
       "applicationUrl": "http://localhost:5143",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Jwt__Key": "mysuperlongsupersecurekey1234567890!!"
       }
     }
   }

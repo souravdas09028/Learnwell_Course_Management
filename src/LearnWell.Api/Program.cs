@@ -1,4 +1,5 @@
 ﻿using LearnWell.Api.Services;
+using LearnWell.Infrastructure.Authentication;
 using LearnWell.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,16 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Add configuration sources (default already includes env vars)
+        builder.Configuration
+               .SetBasePath(Directory.GetCurrentDirectory())
+               .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+               .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+               .AddEnvironmentVariables(); // ✅ this line ensures env vars are read
+
         //JWT Authentiation Setup
-        var jwtKey = builder.Configuration["Jwt:Key"] ?? "supersecretkey123!";
-        var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "LearnWellUniversity";
-        var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "LearnWellUniversityUsers";
+        var jwtSettings = new JwtSettings();
+        builder.Configuration.GetSection("Jwt").Bind(jwtSettings);
 
         builder.Services.AddAuthentication(options =>
         {
@@ -32,9 +39,9 @@ internal class Program
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtIssuer,
-                ValidAudience = jwtAudience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                ValidIssuer = jwtSettings.Issuer,
+                ValidAudience = jwtSettings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
             };
         });
 
@@ -56,6 +63,7 @@ internal class Program
 
         //add services
         builder.Services.AddScoped<AuthService>();
+        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
         // Add Controlers
         builder.Services.AddControllers();
