@@ -1,12 +1,10 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:16
     container_name: learnwell_course_management-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: MyStrongPassword123
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
       POSTGRES_DB: LearnWellDB
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -29,18 +27,18 @@ services:
 
   api:
     build:
-      context: ./src/LearnWell.Api
+      context: .
       dockerfile: Dockerfile
     container_name: learnwell_course_management-api
     ports:
-      - "8080:8080"
+      - "5050:8080"
     depends_on:
       - db
       - seq
     environment:
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Database=LearnWellDB;Username=postgres;Password=MyStrongPassword123
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=LearnWellDB;Username=admin;Password=admin
       - Seq__ServerUrl=http://seq:80
     networks:
       - learnwell-network
