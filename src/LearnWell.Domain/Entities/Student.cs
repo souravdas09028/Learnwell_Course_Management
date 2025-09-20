@@ -3,7 +3,9 @@
 namespace LearnWell.Domain.Entities
 {
     public class Student : BaseEntity
-    {       
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
         public string FullName { get; private set; }
 
         private readonly List<Class> _classes = new();

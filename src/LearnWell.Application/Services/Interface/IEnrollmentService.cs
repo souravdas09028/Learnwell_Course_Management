@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LearnWell.Application.Services.Interface
 {
-    internal interface IEnrollmentService
+    public interface IEnrollmentService
     {
     }
 }

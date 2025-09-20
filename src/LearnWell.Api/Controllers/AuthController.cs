@@ -1,6 +1,4 @@
-﻿using LearnWell.Api.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using LearnWell.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnWell.Api.Controllers
@@ -9,11 +7,11 @@ namespace LearnWell.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _auth;
+        private readonly IAuthService _authService;
 
-        public AuthController(AuthService auth)
+        public AuthController(IAuthService authService)
         {
-            _auth = auth;
+            _authService = authService;
         }
 
         [HttpPost("login")]
@@ -22,13 +20,13 @@ namespace LearnWell.Api.Controllers
             // Replace with real user validation
             if (request.Username == "staff" && request.Password == "mypassword")
             {
-                var token = _auth.GenerateToken(request.Username, "Staff");
+                var token = _authService.GenerateToken(request.Username, "Staff");
                 return Ok(new { token });
             }
 
             if (request.Username == "student" && request.Password == "password")
             {
-                var token = _auth.GenerateToken(request.Username, "Student");
+                var token = _authService.GenerateToken(request.Username, "Student");
                 return Ok(new { Token = token });
             }
 
