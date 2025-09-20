@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LearnWell.Application\LearnWell.Application.csproj" />
     <ProjectReference Include="..\LearnWell.Domain\LearnWell.Domain.csproj" />
   </ItemGroup>
 

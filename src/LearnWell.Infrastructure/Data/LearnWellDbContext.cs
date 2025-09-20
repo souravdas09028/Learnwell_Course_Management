@@ -29,6 +29,5 @@ namespace LearnWell.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(sc => sc.AssignedByStaffId);
         }
-
     }
 }
