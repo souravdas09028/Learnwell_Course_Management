@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LearnWell.Application.Services.Interface
+﻿namespace LearnWell.Application.Services.Interface
 {
     public interface IEnrollmentService
     {
+        Task EnrollStudentInCourseAsync(Guid studentId, Guid courseId, Guid staffId);
+        Task EnrollStudentInClassAsync(Guid studentId, Guid classId, Guid staffId);
     }
 }

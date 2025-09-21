@@ -1,16 +1,27 @@
-﻿using LearnWell.Application.Common.Interfaces;
+﻿using AutoMapper;
+using LearnWell.Application.Common.Interfaces;
 using LearnWell.Application.Services.Interface;
 using LearnWell.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace LearnWell.Application.Services.Implementation
 {
     public class EnrollmentService : IEnrollmentService
     {
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<CourseService> _logger;
 
-        public EnrollmentService(IUnitOfWork unitOfWork)
+        public EnrollmentService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<CourseService> logger)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _logger = logger;
+        }
+
+        public async Task EnrollStudentInClassAsync(Guid studentId, Guid classId, Guid staffId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task EnrollStudentInCourseAsync(Guid studentId, Guid courseId, Guid staffId)
@@ -40,14 +51,5 @@ namespace LearnWell.Application.Services.Implementation
 
             //await _unitOfWork.SaveChangesAsync();
         }
-
-
-        //public async Task EnrollStudentInCourseAsync(Guid studentId, Guid courseId, Guid staffId)
-        //{           
-        //}
-
-        //public async Task EnrollStudentInClassAsync(Guid studentId, Guid classId, Guid staffId)
-        //{
-        //}
     }
 }

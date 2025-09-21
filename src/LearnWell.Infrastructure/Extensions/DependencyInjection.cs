@@ -1,11 +1,14 @@
 ﻿using LearnWell.Application.Common.Interfaces;
+using LearnWell.Application.Common.MappingProfiles;
+using LearnWell.Application.Services.Implementation;
+using LearnWell.Application.Services.Interface;
 using LearnWell.Infrastructure.Authentication;
 using LearnWell.Infrastructure.Data;
 using LearnWell.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -15,6 +18,9 @@ namespace LearnWell.Infrastructure.Extensions
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // AutoMapper
+            services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
             // EF Core with PostgreSQL
             services.AddDbContext<LearnWellDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
@@ -53,6 +59,13 @@ namespace LearnWell.Infrastructure.Extensions
             });
 
             // Application Services
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IClassService, ClassService>();
+            services.AddScoped<ICourseService, CourseService>();
+            services.AddScoped<IEnrollmentService, EnrollmentService>();
+            services.AddScoped<IViewService, ViewService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<AuthService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

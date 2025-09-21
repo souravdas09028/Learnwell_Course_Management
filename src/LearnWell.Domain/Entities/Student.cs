@@ -5,7 +5,7 @@ namespace LearnWell.Domain.Entities
     public class Student : BaseEntity
     {
         public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        public string HashedPassword { get; set; } = string.Empty;
         public string FullName { get; private set; }
 
         private readonly List<Class> _classes = new();
@@ -16,9 +16,11 @@ namespace LearnWell.Domain.Entities
 
         private Student() { }
 
-        public Student(string fullName)
+        public Student(string fullName, string username, string passwordHash)
         {
             FullName = fullName ?? throw new ArgumentNullException(nameof(fullName));
+            Username = username ?? throw new ArgumentNullException(nameof(username));
+            HashedPassword = passwordHash ?? throw new ArgumentNullException(nameof(passwordHash));
         }
 
         public void EnrollInClass(Class @class)

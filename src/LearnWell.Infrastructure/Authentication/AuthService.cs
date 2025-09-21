@@ -1,6 +1,13 @@
-﻿using LearnWell.Application.Common.Interfaces;
+﻿using AutoMapper;
+using LearnWell.Application.Common.DTOs;
+using LearnWell.Application.Common.Interfaces;
+using LearnWell.Application.Services.Implementation;
+using LearnWell.Application.Services.Interface;
+using LearnWell.Domain.Entities;
 using LearnWell.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,20 +19,26 @@ namespace LearnWell.Infrastructure.Authentication
     public class AuthService : IAuthService
     {
         private readonly JwtSettings _jwtSettings;
-        private readonly LearnWellDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<UserService> _logger;
+        private readonly IPasswordHasher _passwordHasher = new PasswordHasher();
 
-        public AuthService(IOptions<JwtSettings> jwtSettings, LearnWellDbContext context)
+        public AuthService(IOptions<JwtSettings> jwtSettings, IUnitOfWork unitOfWork,
+            ILogger<UserService> logger, IPasswordHasher passwordHasher)
         {
             _jwtSettings = jwtSettings.Value;
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+            _passwordHasher = passwordHasher;
         }
 
-        public string GenerateToken(string username, string role)
+        public JwtTokenResponse GenerateToken(string username, string role)
         {
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Role, role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
@@ -38,20 +51,43 @@ namespace LearnWell.Infrastructure.Authentication
                 expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtSettings.ExpiryMinutes)),
                 signingCredentials: creds);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtTokenResponse
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expiration = token.ValidTo
+            };
         }
 
         public async Task<(string Role, bool IsValid)> ValidateCredentialsAsync(string username, string password)
         {
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.Username == username);
-            if (staff != null && staff.PasswordHash == password)
-                return ("Staff", true);
+            var staff = await _unitOfWork.GetRepository<Staff>().GetAsync(s => s.Username == username);
 
-            var student = await _context.Students.FirstOrDefaultAsync(s => s.Username == username);
-            if (student != null && student.Password == password)
-                return ("Student", true);
+            if (staff != null)
+            {
+                if (_passwordHasher.VerifyPassword(staff.HashedPassword, password))
+                {
+                    return ("Staff", true);
+                }
 
-            return (string.Empty, false);
+                _logger.LogWarning("Invalid password for staff: {Username}", username);
+                throw new UnauthorizedAccessException("Invalid username or password");
+            }
+
+            var student = await _unitOfWork.GetRepository<Student>().GetAsync(s => s.Username == username);
+
+            if (student != null)
+            {
+                if (_passwordHasher.VerifyPassword(student.HashedPassword, password))
+                {
+                    return ("Student", true);
+                }
+
+                _logger.LogWarning("Invalid password for student: {Username}", username);
+                throw new UnauthorizedAccessException("Invalid username or password");
+            }
+
+            _logger.LogInformation("No user found with username: {Username}", username);
+            throw new UnauthorizedAccessException("Invalid username or password");
         }
     }
 }

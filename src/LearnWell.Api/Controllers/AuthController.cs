@@ -1,4 +1,5 @@
-﻿using LearnWell.Application.Common.Interfaces;
+﻿using LearnWell.Application.Common.DTOs;
+using LearnWell.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnWell.Api.Controllers
@@ -15,23 +16,16 @@ namespace LearnWell.Api.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // Replace with real user validation
-            if (request.Username == "staff" && request.Password == "mypassword")
-            {
-                var token = _authService.GenerateToken(request.Username, "Staff");
-                return Ok(new { token });
-            }
+            var (role, isValid) = await _authService.ValidateCredentialsAsync(request.Username, request.Password);
 
-            if (request.Username == "student" && request.Password == "password")
-            {
-                var token = _authService.GenerateToken(request.Username, "Student");
-                return Ok(new { Token = token });
-            }
+            if (!isValid)
+                return Unauthorized("Invalid username or password");
+            
+            var token = _authService.GenerateToken(request.Username, role);
 
-            return Unauthorized("Invalid username or password");
+            return Ok(new { Token = token.Token, Expiration = token.Expiration });
         }
     }
-    public record LoginRequest(string Username, string Password);
 }
