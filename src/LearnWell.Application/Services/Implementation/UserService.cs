@@ -34,25 +34,26 @@ namespace LearnWell.Application.Services.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex.Message);
-                _logger.LogError(ex, "Failed to create SKU");
+                _logger.LogError(ex, "Something went wrong");
+                _logger.LogError(ex, "Failed to register student: {Username}", studentDto.Username);
                 throw;
             }
         }
 
-        public async Task RegisterStaffAsync(RegisterStaffDto dto)
+        public async Task RegisterStaffAsync(RegisterStaffDto staffDto)
         {
             try
             {
-                var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-                var staff = new Staff(dto.FullName, dto.Username, hashedPassword);
+                var hashedPassword = _passwordHasher.HashPassword(staffDto.Password);
+                var staff = new Staff(staffDto.FullName, staffDto.Username, hashedPassword);
 
                 await _unitOfWork.GetRepository<Staff>().AddAsync(staff);
                 await _unitOfWork.SaveAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to register staff");
+                _logger.LogError(ex, "Something went wrong");
+                _logger.LogError(ex, "Failed to register student: {Username}", staffDto.Username);
                 throw;
             }
         }
