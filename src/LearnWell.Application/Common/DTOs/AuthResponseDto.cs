@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace LearnWell.Application.Common.DTOs
 {
-    public class EnrollClassDto
+    public class AuthResponseDto
     {
-        public Guid StudentId { get; set; }
-        public Guid ClassId { get; set; }
+        public string Token { get; set; }
+        public DateTime Expiration { get; set; }
     }
 }

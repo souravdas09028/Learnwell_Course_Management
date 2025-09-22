@@ -2,6 +2,7 @@
 using LearnWell.Application.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LearnWell.Api.Controllers
 {
@@ -20,10 +21,15 @@ namespace LearnWell.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateClass(CreateClassDto dto)
         {
-            await _classService.CreateAsync(dto);
-            //return Ok(classEntity);
+            var userIdClaim = User.FindFirst("id") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized("User ID claim not found.");
 
-            return CreatedAtAction(nameof(GetClass), new { id = 0 }, dto);
+            Guid createdBy = Guid.Parse(userIdClaim.Value);
+
+            var createdClass = await _classService.CreateAsync(dto, createdBy);
+
+            return CreatedAtAction(nameof(GetClass), new { id = createdClass.Id }, createdClass);
         }
 
         [HttpGet]
@@ -41,12 +47,12 @@ namespace LearnWell.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateClass(Guid id, CreateClassDto dto)
+        public async Task<IActionResult> UpdateClass(Guid id, ClassDto classDto)
         {
             var classEntity = await _classService.GetAsync(id);
             if (classEntity == null) return NotFound();
 
-            await _classService.UpdateAsync(id, dto);
+            await _classService.UpdateAsync(id, classDto);
             return Ok(classEntity);
         }
 

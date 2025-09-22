@@ -41,12 +41,12 @@ namespace LearnWell.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCourse(Guid id, CreateCourseDto dto)
+        public async Task<IActionResult> UpdateCourse(Guid id, CourseDto courseDto)
         {
             var course = await _courseService.GetAsync(id);
             if (course == null) return NotFound();
 
-            await _courseService.UpdateAsync(id, dto);
+            await _courseService.UpdateAsync(id, courseDto);
             return Ok(course);
         }
 

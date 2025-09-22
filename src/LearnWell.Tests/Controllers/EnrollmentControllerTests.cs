@@ -1,10 +1,13 @@
 ﻿using LearnWell.Api.Controllers;
+using LearnWell.Application.Common.DTOs;
 using LearnWell.Application.Services.Interface;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,28 +22,39 @@ namespace LearnWell.Tests.Controllers
         {
             _enrollmentServiceMock = new Mock<IEnrollmentService>();
             _controller = new EnrollmentController(_enrollmentServiceMock.Object);
+
+            // Mock authenticated user with "id" claim
+            var userId = Guid.NewGuid();
+            var claims = new List<Claim> { new Claim("id", userId.ToString()) };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = principal }
+            };
         }
 
-        //[Fact]
-        //public async Task EnrollInCourse_ReturnsOk()
-        //{
-        //    var dto = new EnrollCourseDto(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        [Fact]
+        public async Task EnrollInCourse_ReturnsOk_WhenEnrollmentSucceeds()
+        {
+            // Arrange
+            var dto = new EnrollCourseDto
+            {
+                StudentId = Guid.NewGuid(),
+                CourseId = Guid.NewGuid()
+            };
 
-        //    var result = await _controller.EnrollInCourse(dto);
+            _enrollmentServiceMock
+                .Setup(s => s.EnrollStudentInCourseAsync(dto.StudentId, dto.CourseId, It.IsAny<Guid>()))
+                .Returns(Task.CompletedTask);
 
-        //    _enrollmentServiceMock.Verify(x => x.EnrollStudentInCourseAsync(dto.StudentId, dto.CourseId, dto.StaffId), Times.Once);
-        //    Assert.IsType<OkObjectResult>(result);
-        //}
+            // Act
+            var result = await _controller.EnrollInCourse(dto);
 
-        //[Fact]
-        //public async Task EnrollInClass_ReturnsOk()
-        //{
-        //    var dto = new EnrollClassDto(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-
-        //    var result = await _controller.EnrollInClass(dto);
-
-        //    _enrollmentServiceMock.Verify(x => x.EnrollStudentInClassAsync(dto.StudentId, dto.ClassId, dto.StaffId), Times.Once);
-        //    Assert.IsType<OkObjectResult>(result);
-        //}
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Student enrolled in course and its classes", okResult.Value);
+        }
     }
 }

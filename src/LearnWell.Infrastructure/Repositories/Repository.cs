@@ -1,6 +1,7 @@
 ﻿using LearnWell.Application.Common.Interfaces;
 using LearnWell.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace LearnWell.Infrastructure.Repositories
@@ -57,37 +58,19 @@ namespace LearnWell.Infrastructure.Repositories
                 throw;
             }            
         }
-        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProps = null)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
         {
             IQueryable<T> query = _dbSet;
 
             if (filter != null)
             {
                 query = query.Where(filter);
-            }
+            }          
 
-            if (!string.IsNullOrEmpty(includeProps))
-            {
-                foreach (var includeProp in includeProps.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(includeProp);
-                }
-            }
+            if (include != null)
+                query = include(query);
 
             return await query.FirstOrDefaultAsync();
-        }
-
-        public async Task<T> GetLastAsync()
-        {
-            //use reflection
-            var property = typeof(T).GetProperty("Id") ?? typeof(T).GetProperty("id");
-            if (property == null)
-            {
-                throw new InvalidOperationException("Entity does not have an Id property.");
-            }
-
-            return await _dbSet.OrderByDescending(e => EF.Property<int>(e, property.Name))
-                              .FirstOrDefaultAsync();
         }
 
         public async Task<T> UpdateAsync(T entity)

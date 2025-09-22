@@ -1,48 +1,41 @@
 ﻿using LearnWell.Api.Controllers;
-using LearnWell.Application.Common.Interfaces;
+using LearnWell.Application.Common.DTOs;
+using LearnWell.Application.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LearnWell.Tests.Controllers
 {
     public class UserControllerTests
     {
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<IUserService> _userServiceMock;
         private readonly UserController _controller;
 
         public UserControllerTests()
         {
-            _unitOfWorkMock = new Mock<IUnitOfWork>();
-            //_controller = new UserController(_unitOfWorkMock.Object);
+            _userServiceMock = new Mock<IUserService>();
+            _controller = new UserController(_userServiceMock.Object);
         }
 
-        //[Fact]
-        //public async Task RegisterStudent_ReturnsOk()
-        //{
-        //    var dto = new RegisterStudentDto("student1", "pass", "Student One", "student@example.com");
+        [Fact]
+        public async Task RegisterStaff_ReturnsOk()
+        {
+            // Arrange
+            var dto = new RegisterStaffDto
+            (
+                 "Admin", "Admin", "admin@learnwell.com", "adminpass"
+            );
 
-        //    var result = await _controller.RegisterStudent(dto);
+            _userServiceMock
+                .Setup(s => s.RegisterStaffAsync(dto))
+                .Returns(Task.CompletedTask);
 
-        //    _unitOfWorkMock.Verify(x => x.Students.AddAsync(It.IsAny<Student>()), Times.Once);
-        //    _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
-        //    Assert.IsType<OkObjectResult>(result);
-        //}
+            // Act
+            var result = await _controller.RegisterStaff(dto);
 
-        //[Fact]
-        //public async Task RegisterStaff_ReturnsOk()
-        //{
-        //    var dto = new RegisterStaffDto("staff1", "pass", "Staff One", "staff@example.com");
-
-        //    var result = await _controller.RegisterStaff(dto);
-
-        //    _unitOfWorkMock.Verify(x => x.Staffs.AddAsync(It.IsAny<Staff>()), Times.Once);
-        //    _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
-        //    Assert.IsType<OkObjectResult>(result);
-        //}
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Staff registered", okResult.Value);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using LearnWell.Application.Common.DTOs;
 using LearnWell.Application.Common.Interfaces;
 using LearnWell.Application.Services.Interface;
+using LearnWell.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace LearnWell.Application.Services.Implementation
@@ -18,29 +19,73 @@ namespace LearnWell.Application.Services.Implementation
             _logger = logger;
         }
 
-        public Task CreateAsync(CreateCourseDto student)
+        public async Task<CourseDto> CreateAsync(CreateCourseDto courseDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var courseEntity = _mapper.Map<Course>(courseDto);
+
+                await _unitOfWork.GetRepository<Course>().AddAsync(courseEntity);
+                await _unitOfWork.SaveAsync();
+
+                var resultDto = _mapper.Map<CourseDto>(courseEntity);
+
+                return resultDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Something went wrong");
+                _logger.LogError(ex, "Failed to save course: {Username}", courseDto.Name);
+                throw;
+            }
         }
 
-        public Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid courseId)
         {
-            throw new NotImplementedException();
+            var courseRepo = _unitOfWork.GetRepository<Course>();
+            var courseEntity = await courseRepo.GetAsync(c => c.Id == courseId);
+
+            if (courseEntity == null)
+            {
+                _logger.LogWarning("Attempted to delete class with ID {CourseId}, but it was not found.", courseId);
+                return false;
+            }
+
+            await courseRepo.DeleteAsync(courseEntity);
+            await _unitOfWork.SaveAsync();
+
+            _logger.LogInformation("Course with ID {CourseId} deleted successfully.", courseId);
+            return true;
         }
 
-        public Task<IEnumerable<CourseDto>> GetAllAsync()
+        public async Task<IEnumerable<CourseDto>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var courses = await _unitOfWork.GetRepository<Course>().GetAllAsync(filter: null);
+            var courseDTOs = _mapper.Map<IEnumerable<CourseDto>>(courses);
+
+            return courseDTOs;
         }
 
-        public Task<CourseDto> GetAsync(Guid id)
+        public async Task<CourseDto> GetAsync(Guid courseId)
         {
-            throw new NotImplementedException();
+            var courseObj = await _unitOfWork.GetRepository<Course>().GetAsync(filter: s => s.Id == courseId);
+            var courseDTO = _mapper.Map<CourseDto>(courseObj);
+
+            return courseDTO;
         }
 
-        public Task UpdateAsync(Guid id, CreateCourseDto staff)
+        public async Task UpdateAsync(Guid userId, CourseDto courseDto)
         {
-            throw new NotImplementedException();
+            var existingCourse = await _unitOfWork.GetRepository<Course>().GetAsync(filter: s => s.Id == courseDto.Id);
+
+            if (existingCourse == null)
+                throw new KeyNotFoundException($"Class with ID {courseDto.Id} not found.");
+
+            existingCourse.Name = courseDto.Name;
+            existingCourse.UpdateAuditFields(userId);
+
+            await _unitOfWork.GetRepository<Course>().UpdateAsync(existingCourse);
+            await _unitOfWork.SaveAsync();
         }
     }
 }

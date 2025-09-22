@@ -1,8 +1,8 @@
 ﻿namespace LearnWell.Application.Common.DTOs
 {
-    public class EnrollCourseDto
+    public class EnrollCourseInClass
     {
-        public Guid StudentId { get; set; }
+        public Guid ClassId { get; set; }
         public Guid CourseId { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using LearnWell.Application.Common.DTOs;
 using LearnWell.Application.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnWell.Api.Controllers
@@ -15,7 +16,8 @@ namespace LearnWell.Api.Controllers
             _userService = userService;
         }
 
-        [HttpPost("register/student")]
+        [Authorize(Roles = "Staff")]
+        [HttpPost("create/student")]
         public async Task<IActionResult> RegisterStudent(RegisterStudentDto dto)
         {
             await _userService.RegisterStudentsAsync(dto);

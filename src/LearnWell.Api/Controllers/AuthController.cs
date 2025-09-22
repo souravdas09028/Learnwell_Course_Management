@@ -18,14 +18,18 @@ namespace LearnWell.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var (role, isValid) = await _authService.ValidateCredentialsAsync(request.Username, request.Password);
+            var (userId,role, isValid) = await _authService.ValidateCredentialsAsync(request.Username, request.Password);
 
             if (!isValid)
                 return Unauthorized("Invalid username or password");
             
-            var token = _authService.GenerateToken(request.Username, role);
+            var token = _authService.GenerateToken(userId,request.Username, role);
 
-            return Ok(new { Token = token.Token, Expiration = token.Expiration });
+            return Ok(new AuthResponseDto
+            {
+                Token = token.Token,
+                Expiration = token.Expiration
+            });
         }
     }
 }

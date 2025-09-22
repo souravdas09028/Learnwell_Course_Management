@@ -32,10 +32,11 @@ namespace LearnWell.Infrastructure.Authentication
             _passwordHasher = passwordHasher;
         }
 
-        public JwtTokenResponse GenerateToken(string username, string role)
+        public JwtTokenResponse GenerateToken(Guid userId, string username, string role)
         {
             var claims = new[]
             {
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -58,7 +59,7 @@ namespace LearnWell.Infrastructure.Authentication
             };
         }
 
-        public async Task<(string Role, bool IsValid)> ValidateCredentialsAsync(string username, string password)
+        public async Task<(Guid userId, string Role, bool IsValid)> ValidateCredentialsAsync(string username, string password)
         {
             var staff = await _unitOfWork.GetRepository<Staff>().GetAsync(s => s.Username == username);
 
@@ -66,7 +67,7 @@ namespace LearnWell.Infrastructure.Authentication
             {
                 if (_passwordHasher.VerifyPassword(staff.HashedPassword, password))
                 {
-                    return ("Staff", true);
+                    return (staff.Id, "Staff", true);
                 }
 
                 _logger.LogWarning("Invalid password for staff: {Username}", username);
@@ -79,7 +80,7 @@ namespace LearnWell.Infrastructure.Authentication
             {
                 if (_passwordHasher.VerifyPassword(student.HashedPassword, password))
                 {
-                    return ("Student", true);
+                    return (student.Id, "Student", true);
                 }
 
                 _logger.LogWarning("Invalid password for student: {Username}", username);

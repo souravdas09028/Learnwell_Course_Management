@@ -4,5 +4,6 @@
     {
         Task EnrollStudentInCourseAsync(Guid studentId, Guid courseId, Guid staffId);
         Task EnrollStudentInClassAsync(Guid studentId, Guid classId, Guid staffId);
+        Task AssignCourseToClassAsync(Guid studentId, Guid classId, Guid staffId);
     }
 }

@@ -8,13 +8,13 @@ namespace LearnWell.Domain.Entities
         public string HashedPassword { get; set; } = string.Empty;
         public string FullName { get; private set; }
 
-        private readonly List<Class> _classes = new();
-        public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
+        private readonly List<StudentClass> _classes = new();
+        public IReadOnlyCollection<StudentClass> Classes => _classes.AsReadOnly();
 
-        private readonly List<Course> _courses = new();
-        public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
+        private readonly List<StudentCourse> _courses = new();
+        public IReadOnlyCollection<StudentCourse> Courses => _courses.AsReadOnly();
 
-        private Student() { }
+        private Student() : base() { } // EF Core needs it
 
         public Student(string fullName, string username, string passwordHash)
         {
@@ -23,13 +23,13 @@ namespace LearnWell.Domain.Entities
             HashedPassword = passwordHash ?? throw new ArgumentNullException(nameof(passwordHash));
         }
 
-        public void EnrollInClass(Class @class)
+        public void EnrollInClass(StudentClass @class)
         {
             if (!_classes.Contains(@class))
                 _classes.Add(@class);
         }
 
-        public void EnrollInCourse(Course course)
+        public void EnrollInCourse(StudentCourse course)
         {
             if (!_courses.Contains(course))
                 _courses.Add(course);

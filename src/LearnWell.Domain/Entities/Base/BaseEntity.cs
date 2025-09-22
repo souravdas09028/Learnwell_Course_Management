@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LearnWell.Domain.Entities.Base
 {
@@ -19,5 +14,21 @@ namespace LearnWell.Domain.Entities.Base
 
         public DateTime? ModifiedDate { get; set; }
         public Guid? ModifiedBy { get; set; }
+
+        protected BaseEntity()
+        {
+            CreatedDate = DateTime.UtcNow;
+        }
+        protected BaseEntity(Guid createdBy)
+        {
+            CreatedDate = DateTime.UtcNow;
+            CreatedBy = createdBy;
+        }
+
+        public void UpdateAuditFields(Guid? modifiedBy)
+        {
+            ModifiedDate = DateTime.UtcNow;
+            ModifiedBy = modifiedBy;
+        }
     }
 }

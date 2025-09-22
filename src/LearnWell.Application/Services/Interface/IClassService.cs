@@ -4,10 +4,10 @@ namespace LearnWell.Application.Services.Interface
 {
     public interface IClassService
     {
-        Task CreateAsync(CreateClassDto student);
+        Task<ClassDto> CreateAsync(CreateClassDto student, Guid createdBy);
         Task<IEnumerable<ClassDto>> GetAllAsync();
         Task<ClassDto> GetAsync(Guid id);
-        Task UpdateAsync(Guid id, CreateClassDto staff);
+        Task UpdateAsync(Guid id, ClassDto staff);
         Task<bool> DeleteAsync(Guid id);
     }
 }

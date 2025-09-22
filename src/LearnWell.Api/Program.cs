@@ -1,4 +1,5 @@
-﻿using LearnWell.Infrastructure.Extensions;
+﻿using LearnWell.Api.Middlewares;
+using LearnWell.Infrastructure.Extensions;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -55,6 +56,8 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // Middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

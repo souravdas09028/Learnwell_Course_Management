@@ -21,11 +21,6 @@ namespace LearnWell.Api.Controllers
         {
             var students = await _viewService.GetStudentsInCourse(courseId);
 
-            //_unitOfWork.StudentCourses.Query()
-            //    .Where(sc => sc.CourseId == courseId)
-            //    .Select(sc => sc.Student)
-            //    .ToListAsync();
-
             return Ok(students);
         }
 
@@ -33,11 +28,6 @@ namespace LearnWell.Api.Controllers
         public async Task<IActionResult> GetStudentsInClass(Guid classId)
         {
             var students = await _viewService.GetStudentsInClass(classId);
-
-            //_unitOfWork.StudentClasses.Query()
-            //.Where(sc => sc.ClassId == classId)
-            //.Select(sc => sc.Student)
-            //.ToListAsync();
 
             return Ok(students);
         }
@@ -47,11 +37,6 @@ namespace LearnWell.Api.Controllers
         {
             var classes = await _viewService.GetClassesInCourse(courseId);
 
-            //_unitOfWork.CourseClasses.Query()
-            //.Where(cc => cc.CourseId == courseId)
-            //.Select(cc => cc.Class)
-            //.ToListAsync();
-
             return Ok(classes);
         }
 
@@ -59,11 +44,6 @@ namespace LearnWell.Api.Controllers
         public async Task<IActionResult> GetCoursesForClass(Guid classId)
         {
             var courses = await _viewService.GetCoursesForClass(classId);
-
-            //_unitOfWork.CourseClasses.Query()
-            //.Where(cc => cc.ClassId == classId)
-            //.Select(cc => cc.Course)
-            //.ToListAsync();
 
             return Ok(courses);
         }
@@ -73,11 +53,6 @@ namespace LearnWell.Api.Controllers
         public async Task<IActionResult> GetClassmates(Guid classId)
         {
             var classmates = await _viewService.GetClassmates(classId);
-
-            //_unitOfWork.StudentClasses.Query()
-            //.Where(sc => sc.ClassId == classId)
-            //.Select(sc => sc.Student)
-            //.ToListAsync();
 
             return Ok(classmates);
         }

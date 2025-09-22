@@ -4,30 +4,31 @@ namespace LearnWell.Domain.Entities
 {
     public class Course : BaseEntity
     {
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
-        private readonly List<Class> _classes = new();
-        public IReadOnlyCollection<Class> Classes => _classes.AsReadOnly();
+        private readonly List<CourseClass> _classes = new();
+        public IReadOnlyCollection<CourseClass> Classes => _classes.AsReadOnly();
 
-        private readonly List<Student> _students = new();
-        public IReadOnlyCollection<Student> Students => _students.AsReadOnly();
+        private readonly List<StudentCourse> _students = new();
+        public IReadOnlyCollection<StudentCourse> Students => _students.AsReadOnly();
 
-        private Course() { } // EF Core needs it
+        private Course() : base() { }
 
         public Course(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        public void AddClass(Class @class)
+        public void AddClass(CourseClass @class)
         {
             if (!_classes.Contains(@class))
                 _classes.Add(@class);
         }
 
-        public void EnrollStudent(Student student)
+        public void EnrollStudent(StudentCourse student)
         {
             if (!_students.Contains(student))
                 _students.Add(student);
-        }    }
+        }
+    }
 }

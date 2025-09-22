@@ -3,12 +3,6 @@ using LearnWell.Application.Common.DTOs;
 using LearnWell.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace LearnWell.Tests.Controllers
 {
     public class AuthControllerTests
@@ -27,40 +21,47 @@ namespace LearnWell.Tests.Controllers
         {
             // Arrange
             var request = new LoginRequest("staff", "mypassword");
-            var tokenResponse = new JwtTokenResponse
+            var expectedToken = new JwtTokenResponse
             {
-                Token = "mocked-token",
-                Expiration = DateTime.UtcNow.AddMinutes(30)
+                Token = "mocked-jwt-token",
+                Expiration = DateTime.UtcNow.AddHours(1)
             };
 
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("staff", "mypassword"))
-                .ReturnsAsync(("Staff", true));
-            _authServiceMock.Setup(x => x.GenerateToken("staff", "Staff")) // assuming GenerateToken takes userId, username, role
-                .Returns(tokenResponse);
+            _authServiceMock
+                .Setup(s => s.ValidateCredentialsAsync(request.Username, request.Password))
+                .ReturnsAsync((Guid.NewGuid(), "Staff", true));
+
+            _authServiceMock
+                .Setup(s => s.GenerateToken(It.IsAny<Guid>(), request.Username, "Staff"))
+                .Returns(expectedToken);
 
             // Act
-            var result = await _controller.Login(request) as OkObjectResult;
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(200, result.StatusCode);
-
-            var value = Assert.IsType<JwtTokenResponse>(result.Value);
-            Assert.Equal("mocked-token", value.Token);
-        }
-
-
-        [Fact]
-        public async Task Login_InvalidCredentials_ReturnsUnauthorized()
-        {
-            var request = new LoginRequest("unknown", "wrong");
-            _authServiceMock.Setup(x => x.ValidateCredentialsAsync("unknown", "wrong"))
-                .ReturnsAsync((string.Empty, false));
-
             var result = await _controller.Login(request);
 
-            Assert.IsType<UnauthorizedObjectResult>(result);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<AuthResponseDto>(okResult.Value);
+
+            Assert.Equal(expectedToken.Token, response.Token);
+            Assert.Equal(expectedToken.Expiration, response.Expiration);
         }
 
+        [Fact]
+        public async Task Login_WithInvalidCredentials_ReturnsUnauthorized()
+        {
+            // Arrange
+            var request = new LoginRequest("wronguser", "wrongpass");
+
+            _authServiceMock
+                .Setup(s => s.ValidateCredentialsAsync(request.Username, request.Password))
+                .ReturnsAsync((Guid.Empty, "", false));
+
+            // Act
+            var result = await _controller.Login(request);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Invalid username or password", unauthorizedResult.Value);
+        }
     }
 }
